@@ -7,9 +7,9 @@ class QuartzNetBlock(nn.Module):
         super(QuartzNetBlock, self).__init__()
         self.res = nn.Sequential(nn.Conv1d(feat_in, filters, kernel_size=1),
                                      nn.BatchNorm1d(filters)) if residual else None
-        conv = []
+        self.conv = nn.ModuleList()
         for idx in range(repeat):
-            conv.append(
+            self.conv.extend(
                 self._get_conv_bn_layer(
                     feat_in,
                     filters,
@@ -18,9 +18,8 @@ class QuartzNetBlock(nn.Module):
                     dilation=dilation,
                     separable=separable))
             if (idx != repeat - 1 and residual):
-                conv.append([nn.ReLU(), nn.Dropout(p=0.2)])
+                self.conv.extend([nn.ReLU(), nn.Dropout(p=0.2)])
             feat_in = filters
-        self.conv = nn.Sequential(*conv)
         self.out = nn.Sequential(nn.ReLU(), nn.Dropout(p=0.2))
 
     def _get_conv_bn_layer(self, in_channels, out_channels, kernel_size,
@@ -44,11 +43,13 @@ class QuartzNetBlock(nn.Module):
         return layers
 
     def forward(self, inputs):
-        outputs = self.conv(inputs)
+        inputs_for_res = inputs
+        for layer in self.conv:
+            inputs = layer(inputs)
         if self.res is not None:
-            outputs = inputs + self.res(inputs)
-        outputs = self.out(outputs)
-        return outputs
+            inputs = inputs + self.res(inputs_for_res)
+        inputs = self.out(inputs)
+        return inputs
 
 class QuartzNet(nn.Module):
     def __init__(self, quartznet_conf, feat_in, num_classes):

@@ -9,6 +9,8 @@ from config import model_config, params
 from decoder import CerWer
 from data_transforms import transforms, collate_fn
 import wandb
+import numpy as np
+from optimizers import Novograd
 import youtokentome as yttm
 
 df = pd.read_csv("LJSpeech-1.1/metadata.csv", sep='|', quotechar='`', index_col=0, header=None)
@@ -30,15 +32,17 @@ test_dataloader = DataLoader(test_dataset,
 device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 model = QuartzNet(quartznet_conf=model_config, num_classes=len(vocab), feat_in=params['num_features'])
 model.to(device)
-criterion = nn.CTCLoss(reduction='sum', zero_infinity=True)
-optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
+criterion = nn.CTCLoss(zero_infinity=True)
+#optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
+optimizer = Novograd(model.parameters(), lr=0.05, betas=(0.95, 0.5), weight_decay=0.001)
 cerwer = CerWer()
 
 wandb.init(project=params["wandb_name"], config=params)
-wandb.watch(model, log="all", log_freq=500)
+wandb.watch(model, log="all", log_freq=1000)
 
 for epoch in range(1, params["num_epochs"] + 1):
-    train_loss, val_loss, train_cer, train_wer, val_wer, val_cer = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    train_cer, train_wer, val_wer, val_cer = 0.0, 0.0, 0.0, 0.0
+    train_losses = []
     model.train()
     for inputs, inputs_length, targets, targets_length in train_dataloader:
         inputs = inputs.to(device)
@@ -50,7 +54,7 @@ for epoch in range(1, params["num_epochs"] + 1):
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), params['clip_grad_norm'])
         optimizer.step()
-        train_loss += loss.item()
+        train_losses.append(loss.item())
         _, max_probs = torch.max(outputs, 2)
         train_epoch_cer, train_epoch_wer, train_decoded_words, train_target_words = cerwer(max_probs.T.cpu().numpy(),
                                                                                              targets.cpu().numpy(),
@@ -60,24 +64,25 @@ for epoch in range(1, params["num_epochs"] + 1):
 
     model.eval()
     with torch.no_grad():
+        val_losses = []
         for inputs, inputs_length, targets, targets_length in test_dataloader:
             inputs = inputs.to(device)
             targets = targets.to(device)
             outputs = model(inputs)
             outputs = outputs.permute(2, 0, 1)
             loss = criterion(outputs.log_softmax(dim=2), targets, inputs_length, targets_length).cpu()
-            val_loss += loss.item()
+            val_losses.append(loss.item())
             _, max_probs = torch.max(outputs, 2)
             val_epoch_cer, val_epoch_wer, val_decoded_words, val_target_words = cerwer(max_probs.T.cpu().numpy(),
                                                                                          targets.cpu().numpy(),
                                                       inputs_length, targets_length)
             val_wer += val_epoch_wer
             val_cer += val_epoch_cer
-    wandb.log({"train_loss": train_loss / len(train_dataset),
-               "train_wer": train_wer / len(train_dataset),
-               "train_cer": train_cer / len(train_dataset),
-               "val_loss": val_loss / len(test_dataset),
+    wandb.log({"train_loss": np.mean(train_losses),
                "val_wer": val_wer / len(test_dataset),
+               "train_cer": train_cer / len(train_dataset),
+               "val_loss": np.mean(val_losses),
+               "train_wer": train_wer / len(train_dataset),
                "val_cer": val_cer / len(test_dataset),
                "train_samples": wandb.Table(columns=["Target text", "Predicted text"],
                                             data=[train_target_words, train_decoded_words]),
