@@ -51,8 +51,8 @@ class MelSpectrogram(object):
     def __call__(self, wav):
         mel_spectrogram = mel_spectrogramer(wav)
         log_mel = torch.log(mel_spectrogram)
-        mean = torch.mean(log_mel)
-        std = torch.std(log_mel)
+        mean = torch.mean(log_mel, dim=1, keepdim=True)
+        std = torch.std(log_mel, dim=1, keepdim=True) + 1e-5
         log_mel = (log_mel - mean) / std
         return log_mel
 
