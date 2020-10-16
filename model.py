@@ -68,10 +68,6 @@ class QuartzNet(nn.Module):
             feat_in = block_conf['filters']
         layers.append(nn.Conv1d(feat_in, num_classes, kernel_size=1))
         self.layers = nn.Sequential(*layers)
-        self.apply(lambda x: self.init_weights(x))
-
-    def init_weights(self, x):
-        nn.init.xavier_uniform_(x.weight)
 
     def forward(self, inputs):
         return self.layers(inputs)

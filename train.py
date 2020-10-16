@@ -29,12 +29,14 @@ test_dataloader = DataLoader(test_dataset,
                              num_workers=params["num_workers"],
                              collate_fn=collate_fn)
 
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:6" if torch.cuda.is_available() else "cpu")
 model = QuartzNet(quartznet_conf=model_config, num_classes=len(vocab), feat_in=params['num_features'])
 model.to(device)
 criterion = nn.CTCLoss(zero_infinity=True)
-#optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
-optimizer = Novograd(model.parameters(), lr=0.05, betas=(0.95, 0.5), weight_decay=0.001)
+optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
+num_steps = len(train_dataloader) * params["num_epochs"]
+lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_steps, eta_min=0.00001)
+#optimizer = Novograd(model.parameters(), lr=0.05, betas=(0.95, 0.5), weight_decay=0.001)
 cerwer = CerWer()
 
 wandb.init(project=params["wandb_name"], config=params)
@@ -54,6 +56,7 @@ for epoch in range(1, params["num_epochs"] + 1):
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), params['clip_grad_norm'])
         optimizer.step()
+        lr_scheduler.step()
         train_losses.append(loss.item())
         _, max_probs = torch.max(outputs, 2)
         train_epoch_cer, train_epoch_wer, train_decoded_words, train_target_words = cerwer(max_probs.T.cpu().numpy(),
