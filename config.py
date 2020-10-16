@@ -11,7 +11,7 @@ model_config = [
 params = {"num_features": 64,
           "sample_rate": 16000,
           "original_sample_rate": 22050,
-          "batch_size": 64,
+          "batch_size": 32,
           "num_workers": 8,
           "lr": 0.0005,
           "num_epochs": 100,

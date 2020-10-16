@@ -1,12 +1,17 @@
 import editdistance
+from dataset import prepare_bpe
+from config import params
 
 
 class CerWer():
     def __init__(self, bpe=None, blank_index=0):
         self.vocab = "B abcdefghijklmnopqrstuvwxyz'"
         self.char2idx = {char: idx for idx, char in enumerate(self.vocab)}
-        self.bpe = bpe
-        self.idx2char = bpe.id_to_subword if bpe is not None else {idx: char for idx, char in enumerate(self.vocab)}
+        if params["bpe"]:
+            bpe = prepare_bpe()
+            self.idx2char = bpe.id_to_subword
+        else:
+            self.idx2char = {idx: char for idx, char in enumerate(self.vocab)}
         self.blank_index = blank_index
 
     def __call__(self, predicts, targets, inputs_length, targets_length):

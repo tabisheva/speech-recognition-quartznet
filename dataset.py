@@ -54,8 +54,3 @@ class LJDataset(Dataset):
 
     def __len__(self):
         return len(self.filenames)
-
-test = pd.read_csv("LJSpeech-1.1/metadata.csv", sep='|', quotechar='`', index_col=0, header=None)[:10]
-
-test_dataset = LJDataset(test)
-test_dataset.__getitem__(0)
