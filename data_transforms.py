@@ -50,7 +50,12 @@ class PitchShifting(object):
 class MelSpectrogram(object):
     def __call__(self, wav):
         mel_spectrogram = mel_spectrogramer(wav)
-        log_mel = torch.log(mel_spectrogram)
+        return mel_spectrogram
+
+
+class NormalizePerFeature(object):
+    def __call__(self, spec):
+        log_mel = torch.log(spec)
         mean = torch.mean(log_mel, dim=1, keepdim=True)
         std = torch.std(log_mel, dim=1, keepdim=True) + 1e-5
         log_mel = (log_mel - mean) / std
@@ -64,11 +69,13 @@ transforms = {
         PitchShifting(),
         TimeStretch(),
         MelSpectrogram(),
+        NormalizePerFeature(),
         torchaudio.transforms.TimeMasking(params["time_masking"], True),
     ]),
     'test': transforms.Compose([
         torchaudio.transforms.Resample(params['original_sample_rate'], params['sample_rate']),
         MelSpectrogram(),
+        NormalizePerFeature(),
     ]),
 }
 
