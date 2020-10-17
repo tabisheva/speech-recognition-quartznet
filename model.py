@@ -6,7 +6,7 @@ class QuartzNetBlock(nn.Module):
                  dilation=1, residual=True, separable=False):
         super(QuartzNetBlock, self).__init__()
         self.res = nn.Sequential(nn.Conv1d(feat_in, filters, kernel_size=1),
-                                     nn.BatchNorm1d(filters)) if residual else None
+                                 nn.BatchNorm1d(filters)) if residual else None
         self.conv = nn.ModuleList()
         for idx in range(repeat):
             self.conv.extend(
@@ -31,13 +31,13 @@ class QuartzNetBlock(nn.Module):
         if separable:
             layers = [
                 nn.Conv1d(in_channels, in_channels, kernel_size,
-                             groups=in_channels, stride=stride, dilation=dilation, padding=same_padding),
+                          groups=in_channels, stride=stride, dilation=dilation, padding=same_padding),
                 nn.Conv1d(in_channels, out_channels, kernel_size=1)
             ]
         else:
             layers = [
                 nn.Conv1d(in_channels, out_channels, kernel_size,
-                             stride=stride, dilation=dilation, padding=same_padding)
+                          stride=stride, dilation=dilation, padding=same_padding)
             ]
         layers.append(nn.BatchNorm1d(out_channels))
         return layers
@@ -50,6 +50,7 @@ class QuartzNetBlock(nn.Module):
             inputs = inputs + self.res(inputs_for_res)
         inputs = self.out(inputs)
         return inputs
+
 
 class QuartzNet(nn.Module):
     def __init__(self, quartznet_conf, feat_in, num_classes):

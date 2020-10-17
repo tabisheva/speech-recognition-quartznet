@@ -36,7 +36,7 @@ criterion = nn.CTCLoss(zero_infinity=True)
 optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
 num_steps = len(train_dataloader) * params["num_epochs"]
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_steps, eta_min=0.00001)
-#optimizer = Novograd(model.parameters(), lr=0.05, betas=(0.95, 0.5), weight_decay=0.001)
+# optimizer = Novograd(model.parameters(), lr=0.05, betas=(0.95, 0.5), weight_decay=0.001)
 cerwer = CerWer()
 
 wandb.init(project=params["wandb_name"], config=params)
@@ -60,8 +60,9 @@ for epoch in range(1, params["num_epochs"] + 1):
         train_losses.append(loss.item())
         _, max_probs = torch.max(outputs, 2)
         train_epoch_cer, train_epoch_wer, train_decoded_words, train_target_words = cerwer(max_probs.T.cpu().numpy(),
-                                                                                             targets.cpu().numpy(),
-                                              inputs_length, targets_length)
+                                                                                           targets.cpu().numpy(),
+                                                                                           inputs_length,
+                                                                                           targets_length)
         train_wer += train_epoch_wer
         train_cer += train_epoch_cer
 
@@ -77,8 +78,8 @@ for epoch in range(1, params["num_epochs"] + 1):
             val_losses.append(loss.item())
             _, max_probs = torch.max(outputs, 2)
             val_epoch_cer, val_epoch_wer, val_decoded_words, val_target_words = cerwer(max_probs.T.cpu().numpy(),
-                                                                                         targets.cpu().numpy(),
-                                                      inputs_length, targets_length)
+                                                                                       targets.cpu().numpy(),
+                                                                                       inputs_length, targets_length)
             val_wer += val_epoch_wer
             val_cer += val_epoch_cer
     wandb.log({"train_loss": np.mean(train_losses),

@@ -8,13 +8,14 @@ from config import params
 import pandas as pd
 import string
 
-
 vocab = "B abcdefghijklmnopqrstuvwxyz'"  # B: blank
 char2idx = {char: idx for idx, char in enumerate(vocab)}
 PUNCTUATION = string.punctuation + '—–«»−…‑'
 
+
 def convert_text(text):
     return [char2idx[char] for char in text if char in char2idx]
+
 
 def prepare_bpe():
     bpe_path = params["bpe_model"]

@@ -6,7 +6,6 @@ from config import params
 import librosa
 import numpy as np
 
-
 mel_spectrogramer = torchaudio.transforms.MelSpectrogram(
     sample_rate=params["sample_rate"],
     n_fft=512,
@@ -17,6 +16,7 @@ mel_spectrogramer = torchaudio.transforms.MelSpectrogram(
     n_mels=64,
 )
 
+
 class AddNormalNoise(object):
     def __init__(self):
         self.var = params["noise_variance"]
@@ -25,6 +25,7 @@ class AddNormalNoise(object):
         noiser = distributions.Normal(0, self.var)
         wav += noiser.sample(wav.size())
         return wav.clamp(-1, 1)
+
 
 class TimeStretch(object):
     def __init__(self):
@@ -36,6 +37,7 @@ class TimeStretch(object):
         wav_stretched = librosa.effects.time_stretch(wav.numpy(), random_stretch)
         return torch.from_numpy(wav_stretched)
 
+
 class PitchShifting(object):
     def __init__(self):
         self.sample_rate = params["sample_rate"]
@@ -46,6 +48,7 @@ class PitchShifting(object):
         random_shift = np.random.uniform(self.min_shift, self.max_shift, 1)[0]
         wav_shifted = librosa.effects.pitch_shift(wav.numpy(), self.sample_rate, random_shift)
         return torch.from_numpy(wav_shifted)
+
 
 class MelSpectrogram(object):
     def __call__(self, wav):
@@ -79,6 +82,7 @@ transforms = {
     ]),
 }
 
+
 def collate_fn(batch):
     """
     Stacking sequences of variable lengths in batches with zero-padding in the end of sequences
@@ -92,5 +96,5 @@ def collate_fn(batch):
     input_aligned = torch.nn.utils.rnn.pad_sequence(inputs, batch_first=True).permute(0, 2, 1)
     target_aligned = torch.nn.utils.rnn.pad_sequence(targets, batch_first=True)
 
-    return input_aligned, torch.Tensor(inputs_length).long(),\
+    return input_aligned, torch.Tensor(inputs_length).long(), \
            target_aligned, torch.Tensor(targets_length).long()
