@@ -36,3 +36,9 @@ class CerWer():
                 else:
                     string = string + char
         return string
+
+    def inference(self, predicts, input_len):
+        predict_string = self.process_string(predicts, input_len, remove_repetitions=True)
+        predict_words = predict_string.rstrip().split('_')
+        return predict_words
+

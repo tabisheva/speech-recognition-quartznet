@@ -27,7 +27,7 @@ test_dataloader = DataLoader(test_dataset,
                              num_workers=params["num_workers"],
                              collate_fn=collate_fn)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
 
 model = QuartzNet(quartznet_conf=model_config, num_classes=params["vocab_size"], feat_in=params['num_features'])
 if params["from_pretrained"]:
@@ -99,4 +99,4 @@ for epoch in range(start_epoch, params["num_epochs"] + 1):
     #    \ttrain_cer: {train_cer / len(train_dataset):.4} \tval_cer: {val_cer / len(test_dataset):.4}
     #     \tval_target: {val_target_words} \tval_predicted: {val_decoded_words}\n""")
     if (epoch % 10 == 0) and (epoch >= 40):
-        torch.save(model.state_dict(), f"model{epoch}")
+        torch.save(model.state_dict(), f"model{epoch}.pth")
