@@ -1,6 +1,5 @@
 import editdistance
-from dataset import prepare_bpe
-from config import params
+from src.dataset import prepare_bpe
 
 
 class CerWer():

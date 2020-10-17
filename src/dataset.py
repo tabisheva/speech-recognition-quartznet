@@ -8,14 +8,7 @@ from config import params
 import pandas as pd
 import string
 
-vocab = "B abcdefghijklmnopqrstuvwxyz'"  # B: blank
-char2idx = {char: idx for idx, char in enumerate(vocab)}
 PUNCTUATION = string.punctuation + '—–«»−…‑'
-
-
-def convert_text(text):
-    return [char2idx[char] for char in text if char in char2idx]
-
 
 def prepare_bpe():
     bpe_path = params["bpe_model"]
@@ -43,10 +36,7 @@ class LJDataset(Dataset):
     def __getitem__(self, idx):
         filename = self.filenames[idx]
         text = self.labels[idx].lower().strip().translate(str.maketrans('', '', PUNCTUATION))
-        if params["bpe"]:
-            text = np.array(self.bpe.encode(text, dropout_prob=0.2))
-        else:
-            text = np.array(convert_text(self.labels[idx].lower()))
+        text = np.array(self.bpe.encode(text, dropout_prob=0.2))
         wav, sr = torchaudio.load(os.path.join(self.dir, f'{filename}.wav'))
         wav = wav.squeeze()
         input = self.transform(wav)

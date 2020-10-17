@@ -3,15 +3,13 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import pandas as pd
-from dataset import LJDataset, vocab
-from model import QuartzNet
+from src.dataset import LJDataset
+from src.model import QuartzNet
 from config import model_config, params
-from decoder import CerWer
-from data_transforms import transforms, collate_fn
+from src.decoder import CerWer
+from src.data_transforms import transforms, collate_fn
 import wandb
 import numpy as np
-from optimizers import Novograd
-import youtokentome as yttm
 
 df = pd.read_csv("LJSpeech-1.1/metadata.csv", sep='|', quotechar='`', index_col=0, header=None)
 train, test = train_test_split(df, test_size=0.2, random_state=10)
@@ -30,19 +28,22 @@ test_dataloader = DataLoader(test_dataset,
                              collate_fn=collate_fn)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 model = QuartzNet(quartznet_conf=model_config, num_classes=params["vocab_size"], feat_in=params['num_features'])
+if params["from_pretrained"]:
+    model.load_state_dict(torch.load(params["model_path"]))
 model.to(device)
 criterion = nn.CTCLoss(zero_infinity=True)
 optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
 num_steps = len(train_dataloader) * params["num_epochs"]
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_steps, eta_min=0.00001)
-# optimizer = Novograd(model.parameters(), lr=0.05, betas=(0.95, 0.5), weight_decay=0.001)
 cerwer = CerWer()
 
 wandb.init(project=params["wandb_name"], config=params)
 wandb.watch(model, log="all", log_freq=1000)
 
-for epoch in range(1, params["num_epochs"] + 1):
+start_epoch = params["start_epoch"] + 1 if params["from_pretrained"] else 1
+for epoch in range(start_epoch, params["num_epochs"] + 1):
     train_cer, train_wer, val_wer, val_cer = 0.0, 0.0, 0.0, 0.0
     train_losses = []
     model.train()
