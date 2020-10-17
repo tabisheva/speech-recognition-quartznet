@@ -31,7 +31,7 @@ class LJDataset(Dataset):
         self.filenames = df.index.values
         self.labels = df[2].values
         self.transform = transform
-        self.bpe = prepare_bpe() if params["bpe"] else None
+        self.bpe = prepare_bpe()
 
     def __getitem__(self, idx):
         filename = self.filenames[idx]
