@@ -18,6 +18,7 @@ mel_spectrogramer = torchaudio.transforms.MelSpectrogram(
 
 
 class AddNormalNoise(object):
+
     def __init__(self):
         self.var = params["noise_variance"]
 
@@ -29,6 +30,7 @@ class AddNormalNoise(object):
 
 
 class TimeStretch(object):
+
     def __init__(self):
         self.min_scale = params["min_time_stretch"]
         self.max_scale = params["max_time_stretch"]
@@ -64,6 +66,9 @@ class MelSpectrogram(object):
 
 
 class NormalizePerFeature(object):
+    """
+    Normalize the spectrogram to mean=0, std=1 per channel
+    """
     def __call__(self, spec):
         log_mel = torch.log(spec)
         mean = torch.mean(log_mel, dim=1, keepdim=True)

@@ -11,6 +11,10 @@ import string
 PUNCTUATION = string.punctuation + '—–«»−…‑'
 
 def prepare_bpe():
+    """
+    Loads bpe model if exists, if not - traines and saves it
+    :return:
+    """
     bpe_path = params["bpe_model"]
     if not os.path.exists(bpe_path):
         df = pd.read_csv("LJSpeech-1.1/metadata.csv", sep='|', quotechar='`', index_col=0, header=None)

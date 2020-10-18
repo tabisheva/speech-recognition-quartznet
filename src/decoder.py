@@ -10,6 +10,13 @@ class CerWer():
         self.space_simbol = space_simbol
 
     def __call__(self, predicts, targets, inputs_length, targets_length):
+        """
+        :param predicts: tensor (batch, len_input) with ids of decoded tokens
+        :param targets: tensor (batch, len_target) with ids of target texts
+        :param inputs_length: tensor (batch, ) original lenth og input
+        :param targets_length: tensor (batch, ) original length of target
+        :return: sum of cer over batch, sum of wer over batch, last predicted string, last target for logs
+        """
         cer = 0.0
         wer = 0.0
         for predict, target, input_length, target_length in zip(predicts, targets, inputs_length, targets_length):
@@ -27,6 +34,13 @@ class CerWer():
         return cer, wer, predict_string, target_string
 
     def process_string(self, sequence, length, remove_repetitions=False):
+        """
+        Returns decoded string without blank simbols and just convert target to original text
+        :param sequence: tensor with signal
+        :param length: original length of signal
+        :param remove_repetitions: True for removing repetitions in predicted string
+        :return: decoded string
+        """
         string = ''
         for i in range(length):
             char = self.idx2char(sequence[i])
@@ -38,6 +52,11 @@ class CerWer():
         return string
 
     def inference(self, predicts, input_len):
+        """
+        :param predicts:
+        :param input_len:
+        :return:
+        """
         predict_string = self.process_string(predicts, input_len, remove_repetitions=True)
         predict_words = predict_string.rstrip().split('_')
         return predict_words

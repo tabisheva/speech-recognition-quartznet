@@ -94,9 +94,6 @@ for epoch in range(start_epoch, params["num_epochs"] + 1):
                "val_samples": wandb.Table(columns=["Target text", "Predicted text"],
                                           data=[val_target_words, val_decoded_words]),
                })
-    # print(f"""Epoch: {epoch} \ttrain_loss: {train_loss / len(train_dataset):.4} \tval_loss: {val_loss / len(test_dataset):.4}
-    #    \ttrain_wer:, {train_wer / len(train_dataset):.4} \tval_wer: {val_wer / len(test_dataset):.4}
-    #    \ttrain_cer: {train_cer / len(train_dataset):.4} \tval_cer: {val_cer / len(test_dataset):.4}
-    #     \tval_target: {val_target_words} \tval_predicted: {val_decoded_words}\n""")
+
     if (epoch % 10 == 0) and (epoch >= 40):
         torch.save(model.state_dict(), f"model{epoch}.pth")
