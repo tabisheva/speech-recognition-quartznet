@@ -27,7 +27,7 @@ test_dataloader = DataLoader(test_dataset,
                              num_workers=params["num_workers"],
                              collate_fn=collate_fn)
 
-device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 model = QuartzNet(quartznet_conf=model_config, num_classes=params["vocab_size"], feat_in=params['num_features'])
 if params["from_pretrained"]:

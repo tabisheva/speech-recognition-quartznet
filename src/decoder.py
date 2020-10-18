@@ -58,6 +58,6 @@ class CerWer():
         :return:
         """
         predict_string = self.process_string(predicts, input_len, remove_repetitions=True)
-        predict_words = predict_string.rstrip().split('_')
+        predict_words = predict_string.split('▁')
         return predict_words
 
