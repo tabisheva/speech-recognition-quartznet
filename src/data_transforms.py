@@ -70,7 +70,7 @@ class NormalizePerFeature(object):
     Normalize the spectrogram to mean=0, std=1 per channel
     """
     def __call__(self, spec):
-        log_mel = torch.log(spec)
+        log_mel = torch.log(torch.clamp(spec, min=1e-18))
         mean = torch.mean(log_mel, dim=1, keepdim=True)
         std = torch.std(log_mel, dim=1, keepdim=True) + 1e-5
         log_mel = (log_mel - mean) / std

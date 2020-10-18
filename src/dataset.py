@@ -10,6 +10,7 @@ import string
 
 PUNCTUATION = string.punctuation + '—–«»−…‑'
 
+
 def prepare_bpe():
     """
     Loads bpe model if exists, if not - traines and saves it
