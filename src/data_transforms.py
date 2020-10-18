@@ -23,7 +23,8 @@ class AddNormalNoise(object):
 
     def __call__(self, wav):
         noiser = distributions.Normal(0, self.var)
-        wav += noiser.sample(wav.size())
+        if np.random.uniform() < 0.5:
+            wav += noiser.sample(wav.size())
         return wav.clamp(-1, 1)
 
 
@@ -34,7 +35,10 @@ class TimeStretch(object):
 
     def __call__(self, wav):
         random_stretch = np.random.uniform(self.min_scale, self.max_scale, 1)[0]
-        wav_stretched = librosa.effects.time_stretch(wav.numpy(), random_stretch)
+        if np.random.uniform() < 0.5:
+            wav_stretched = librosa.effects.time_stretch(wav.numpy(), random_stretch)
+        else:
+            wav_stretched = wav.numpy()
         return torch.from_numpy(wav_stretched)
 
 
@@ -46,7 +50,10 @@ class PitchShifting(object):
 
     def __call__(self, wav):
         random_shift = np.random.uniform(self.min_shift, self.max_shift, 1)[0]
-        wav_shifted = librosa.effects.pitch_shift(wav.numpy(), self.sample_rate, random_shift)
+        if np.random.uniform() < 0.5:
+            wav_shifted = librosa.effects.pitch_shift(wav.numpy(), self.sample_rate, random_shift)
+        else:
+            wav_shifted = wav.numpy()
         return torch.from_numpy(wav_shifted)
 
 
