@@ -2,13 +2,13 @@
 A PyTorch implementation of [QuartzNet](https://arxiv.org/pdf/1910.10261.pdf), an End-to-End ASR on [LJSpeech dataset](https://keithito.com/LJ-Speech-Dataset/).
 
 ## Usage
-Set preferred configurations in ```config.py``` and run ```./run_docker.sh```
+Set preferred configurations in ```config.py``` and run ```./run_docker.sh``` (don't forget about correct ```volume``` option)
 
 
 ### Training
 ```bash
-wget https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2
-tar xjf LJSpeech-1.1
+wget https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2   # download data
+tar xjf LJSpeech-1.1                                              # unzip data
 python train.py
 ```
 You will need to log in to your account in ```wandb.ai``` for monitoring logs.
