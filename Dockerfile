@@ -12,5 +12,5 @@ RUN apt-get -y update && \
                        tmux
 
 COPY requirements.txt /root/requirements.txt
+RUN pip install -U pip && pip install -r /root/requirements.txt
 
-RUN pip install --upgrade pip && pip install -U -r requirements.txt
